@@ -12,3 +12,6 @@ ENV/
 
 # VS code related
 .vscode/
+
+# PDF files
+.pdf
