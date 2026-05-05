@@ -1,0 +1,14 @@
+# Generated or local data files
+market_risk/data/
+
+# Additional materials
+market_risk/additional_materials/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# VS code related
+.vscode/
