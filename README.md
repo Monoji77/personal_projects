@@ -25,13 +25,3 @@ The tree below excludes anything matched by `.gitignore`.
         |-- sp500_and_individual_assets_close_prices_side_by_side.png
         `-- sp500_log_returns_over_time.png
 ```
-
-## Ignored Local Artifacts
-
-The following paths are intentionally omitted from the tree because they are ignored:
-
-- `.venv/`
-- `market_risk/data/`
-- `market_risk/additional_materials/`
-- `*.pdf`
-- `__pycache__/`
