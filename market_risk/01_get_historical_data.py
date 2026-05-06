@@ -1,9 +1,14 @@
+#######################
+#
+# (0) LIBRARIES
+#
+#######################
 import pandas as pd
 import yfinance as yf
 
 #######################
 #
-# GLOBAL VARIABLE
+# (1) GLOBAL VARIABLES
 #
 #######################
 SP500_STOCK_CODE = '^GSPC'
@@ -24,7 +29,7 @@ end_date = "2026-05-04"
 
 #######################
 #
-# HELPER FUNCTIONS 
+# (2) HELPER FUNCTIONS 
 #
 #######################
 def get_stock_market_index_history(stock_code: str, start_date: str, end_date: str) -> pd.DataFrame:
@@ -72,7 +77,7 @@ def main():
 
 #######################
 #
-# Run main function
+# (3) RUN MAIN
 #
 #######################
 if __name__ == "__main__":
