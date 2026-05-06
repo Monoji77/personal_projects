@@ -1,5 +1,5 @@
 # Generated or local data files
-market_risk/data/
+market_risk/data/*
 
 # Additional materials
 market_risk/additional_materials/
@@ -15,3 +15,7 @@ ENV/
 
 # PDF files
 .pdf
+
+# pycache
+__pycache__/
+*.pyc

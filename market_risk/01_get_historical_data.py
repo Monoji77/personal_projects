@@ -35,7 +35,7 @@ def get_stock_market_index_history(stock_code: str, start_date: str, end_date: s
         start=start_date,
         end=end_date,
         interval='1d',
-        auto_adjust=False,
+        auto_adjust=True,
     )
 
     return SP500_prices
@@ -48,7 +48,7 @@ def get_top_5_individual_assets_history(stock_code_lst: list, start_date: str, e
         start=start_date,
         end=end_date,
         interval='1d',
-        auto_adjust=False,
+        auto_adjust=True,
     )
 
     return individual_assets_prices
