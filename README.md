@@ -3,7 +3,7 @@
 This repository is intended to hold multiple projects. At the moment, the only active project is `market_risk`.
 
 ## Active Project
-![Portfolio Risk Lab](market_risk/additional_materials/image-1.png)
+![Portfolio Risk Lab](market_risk/figure/extra/image-1.png)
 `market_risk` is a market risk engine built around a fixed five-asset technology universe:
 
 - `AAPL`

@@ -1,5 +1,5 @@
 # Market Risk Engine
-![Portfolio Risk Lab](additional_materials/image-1.png)
+![Portfolio Risk Lab](figure/extra/image-1.png)
 Interactive Streamlit dashboard for exploring portfolio construction, tail-risk measurement, model backtesting, stress testing, and risk attribution for a five-asset technology basket:
 
 - `AAPL`
