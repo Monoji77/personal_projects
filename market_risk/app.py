@@ -23,7 +23,7 @@ except Exception as error:
 
 APP_DIR = Path(__file__).resolve().parent
 STYLE_PATH = APP_DIR / "style.css"
-DISPLAY_PHOTO_PATH = APP_DIR / "additional_materials" / "display.jpg"
+DISPLAY_PHOTO_PATH = APP_DIR / "figure" / "extra" / "display.jpg"
 SCRIPTS_DIR = APP_DIR / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
