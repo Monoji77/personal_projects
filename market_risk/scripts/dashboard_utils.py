@@ -8,6 +8,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+try:
+    from arch import arch_model
+except ModuleNotFoundError:
+    arch_model = None
+
 from path_utils import project_path
 from risk_engine_utils import (
     combine_price_data,
@@ -35,6 +40,7 @@ TAIL_PROBABILITY = 1.0 - CONFIDENCE_LEVEL
 ANNUALIZATION_FACTOR = 252
 EWMA_LAMBDA = 0.94
 EWMA_DEFAULT_NU = 8.0
+GARCH_REFIT_FREQUENCY = 20
 CLOSE_COL = "Close"
 DATE_COL = "Date"
 RF_RATE_DAILY_COL = "rf_rate_daily"
@@ -319,6 +325,101 @@ def compute_ewma_t_var_es(returns: pd.Series, nu: float = EWMA_DEFAULT_NU) -> pd
     return risk_df
 
 
+def fit_garch_t_model(returns_scaled: pd.Series):
+    if arch_model is None:
+        raise ModuleNotFoundError("The 'arch' package is required to refit GARCH-t live.")
+
+    model = arch_model(
+        returns_scaled,
+        mean="Constant",
+        vol="GARCH",
+        p=1,
+        q=1,
+        dist="t",
+        rescale=False,
+    )
+    return model.fit(disp="off", show_warning=False)
+
+
+@st.cache_data(show_spinner=False)
+def compute_garch_t_var_es(returns: pd.Series) -> pd.DataFrame:
+    returns = returns.sort_index()
+    rolling_var = pd.Series(np.nan, index=returns.index, dtype=float)
+    rolling_es = pd.Series(np.nan, index=returns.index, dtype=float)
+    returns_scaled = returns * 100.0
+    backtest_positions = np.flatnonzero(returns.index >= pd.Timestamp(BACKTEST_START))
+    previous_fit_parameters: dict[str, float] | None = None
+    previous_sigma2: float | None = None
+    previous_epsilon: float | None = None
+
+    for block_start_index in range(0, len(backtest_positions), GARCH_REFIT_FREQUENCY):
+        block_positions = backtest_positions[block_start_index:block_start_index + GARCH_REFIT_FREQUENCY]
+        if len(block_positions) == 0:
+            continue
+
+        first_position = int(block_positions[0])
+        fit_sample = returns_scaled.iloc[:first_position].dropna()
+        if len(fit_sample) < WINDOW_SIZE:
+            continue
+
+        try:
+            fitted_model = fit_garch_t_model(fit_sample)
+            fitted_parameters = fitted_model.params
+            mu = float(fitted_parameters["mu"])
+            omega = float(fitted_parameters["omega"])
+            alpha = float(fitted_parameters["alpha[1]"])
+            beta = float(fitted_parameters["beta[1]"])
+            nu = float(fitted_parameters["nu"])
+            sigma2_block_start = float(fitted_model.forecast(horizon=1, reindex=False).variance.iloc[-1, 0])
+            previous_fit_parameters = {
+                "mu": mu,
+                "omega": omega,
+                "alpha[1]": alpha,
+                "beta[1]": beta,
+                "nu": nu,
+            }
+        except Exception:
+            if previous_fit_parameters is None or previous_sigma2 is None or previous_epsilon is None:
+                raise
+
+            mu = previous_fit_parameters["mu"]
+            omega = previous_fit_parameters["omega"]
+            alpha = previous_fit_parameters["alpha[1]"]
+            beta = previous_fit_parameters["beta[1]"]
+            nu = previous_fit_parameters["nu"]
+            sigma2_block_start = omega + alpha * previous_epsilon ** 2 + beta * previous_sigma2
+
+        q_alpha = standardized_t_quantile(nu, TAIL_PROBABILITY)
+        es_alpha_standardized = standardized_t_expected_shortfall(nu, TAIL_PROBABILITY)
+
+        for block_position_offset, position in enumerate(block_positions):
+            position = int(position)
+            if block_position_offset == 0:
+                sigma2_t = max(sigma2_block_start, 1e-12)
+            else:
+                sigma2_t = max(omega + alpha * previous_epsilon ** 2 + beta * previous_sigma2, 1e-12)
+
+            sigma_t = float(np.sqrt(sigma2_t))
+            rolling_var.iloc[position] = max(-(mu + sigma_t * q_alpha) / 100.0, 0.0)
+            rolling_es.iloc[position] = max(-(mu + sigma_t * es_alpha_standardized) / 100.0, 0.0)
+            previous_sigma2 = sigma2_t
+            previous_epsilon = float(returns_scaled.iloc[position] - mu)
+
+    risk_df = pd.DataFrame({
+        DATE_COL: returns.index,
+        "Return": returns.to_numpy(),
+        "Rolling VaR (95%, 252D)": rolling_var.to_numpy(),
+        "Rolling ES (95%, 252D)": rolling_es.to_numpy(),
+    })
+    risk_df["VaR Breach"] = (risk_df["Return"] < -risk_df["Rolling VaR (95%, 252D)"]).where(
+        risk_df["Rolling VaR (95%, 252D)"].notna()
+    )
+    risk_df["Loss Exceeds ES"] = (risk_df["Return"] < -risk_df["Rolling ES (95%, 252D)"]).where(
+        risk_df["Rolling ES (95%, 252D)"].notna()
+    )
+    return risk_df
+
+
 def filter_backtest_risk_df(risk_df: pd.DataFrame) -> pd.DataFrame:
     return risk_df.loc[risk_df[DATE_COL] >= pd.Timestamp(BACKTEST_START)].copy()
 
@@ -338,6 +439,7 @@ def summarize_portfolio_performance(
 
     return {
         "Backtest Cumulative Return": cumulative_return,
+        "Backtest CAGR": annualized_return,
         "Annualized Return": annualized_return,
         "Annualized Volatility": annualized_volatility,
         "Sharpe Ratio": compute_sharpe_ratio(backtest_returns, risk_free_rate),
@@ -537,6 +639,7 @@ def make_returns_vs_var_chart(
     risk_df: pd.DataFrame,
     title: str,
     ewma_df: pd.DataFrame | None = None,
+    garch_df: pd.DataFrame | None = None,
 ) -> go.Figure:
     figure = go.Figure()
     figure.add_trace(go.Scatter(
@@ -544,7 +647,7 @@ def make_returns_vs_var_chart(
         y=risk_df["Return"],
         mode="lines",
         name="Actual Return",
-        line=dict(color="#1f77b4"),
+        line=dict(color="#2563EB", width=2.4),
     ))
     figure.add_trace(go.Scatter(
         x=risk_df[DATE_COL],
@@ -571,6 +674,15 @@ def make_returns_vs_var_chart(
             mode="lines",
             name="EWMA-t VaR Threshold",
             line=dict(color="#2ca02c", dash="dash"),
+        ))
+
+    if garch_df is not None and not garch_df.empty:
+        figure.add_trace(go.Scatter(
+            x=garch_df[DATE_COL],
+            y=-garch_df["Rolling VaR (95%, 252D)"],
+            mode="lines",
+            name="GARCH-t VaR Threshold",
+            line=dict(color="#F59E0B", dash="dot"),
         ))
 
     figure.update_layout(title=title, yaxis_tickformat=".1%")
@@ -636,7 +748,7 @@ def make_model_comparison_chart(model_df: pd.DataFrame, portfolio_name: str) -> 
             y=actual_returns["Return"],
             mode="lines",
             name="Actual Return",
-            line=dict(color="black"),
+            line=dict(color="#2563EB", width=2.4),
         ))
     figure.update_layout(
         title=f"VaR Thresholds by Model: {portfolio_name}",

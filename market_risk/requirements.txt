@@ -1,9 +1,12 @@
-streamlit
-pandas
-numpy
-plotly
+arch
 matplotlib
-scipy
+numpy
+pandas
+plotly
 pyarrow
+scipy
+seaborn
+streamlit
 streamlit-extras
 streamlit-on-hover-tabs
+yfinance
