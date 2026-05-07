@@ -1,0 +1,4 @@
+Portfolio,Training Start,Training End,Number of Training Observations,In-Sample Annualized Return,In-Sample Annualized Volatility,In-Sample Sharpe Ratio,Largest Weight,Smallest Weight,Number of Nonzero Weights
+Equal Weighted Portfolio,2016-01-01,2025-01-01,2178,0.3902579544052587,0.278116925055835,1.2536925104061551,0.2,0.2,5
+Long-only Global Minimum Variance Portfolio,2016-01-01,2025-01-01,2178,0.29253943888630274,0.24874310351207768,1.077141453901501,0.3558312074903289,0.0,4
+Long-only Tangency Portfolio,2016-01-01,2025-01-01,2178,0.6120404449221313,0.3707760499328054,1.420644084633769,0.5752644457586508,0.0,3

@@ -1,0 +1,16 @@
+Scenario,Scenario Type,Scenario Horizon,Ticker,Shock Return
+Market-wide selloff,Deterministic,1D,AAPL,-0.05
+Market-wide selloff,Deterministic,1D,GOOG,-0.05
+Market-wide selloff,Deterministic,1D,NVDA,-0.05
+Market-wide selloff,Deterministic,1D,MSFT,-0.05
+Market-wide selloff,Deterministic,1D,AMZN,-0.05
+NVDA-specific crash,Deterministic,1D,AAPL,-0.03
+NVDA-specific crash,Deterministic,1D,GOOG,-0.03
+NVDA-specific crash,Deterministic,1D,NVDA,-0.15
+NVDA-specific crash,Deterministic,1D,MSFT,-0.03
+NVDA-specific crash,Deterministic,1D,AMZN,-0.03
+Extreme single-day tech crash,Deterministic,1D,AAPL,-0.1
+Extreme single-day tech crash,Deterministic,1D,GOOG,-0.1
+Extreme single-day tech crash,Deterministic,1D,NVDA,-0.15
+Extreme single-day tech crash,Deterministic,1D,MSFT,-0.1
+Extreme single-day tech crash,Deterministic,1D,AMZN,-0.1

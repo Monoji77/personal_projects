@@ -1,0 +1,9 @@
+streamlit
+pandas
+numpy
+plotly
+matplotlib
+scipy
+pyarrow
+streamlit-extras
+streamlit-on-hover-tabs

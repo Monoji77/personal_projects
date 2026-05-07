@@ -1,0 +1,8 @@
+digraph test {
+	graph [fontcolor="#2D3436" fontname="Sans-Serif" fontsize=15 label=test nodesep=0.60 pad=2.0 rankdir=LR ranksep=0.75 splines=ortho]
+	node [fixedsize=true fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13 height=1.4 imagescale=true labelloc=b shape=box style=rounded width=1.4]
+	edge [color="#7B8894"]
+	"1af045c25b3148b993004293afe34ebd" [label=Center height=1.9 image="C:\Users\chris\AppData\Local\Programs\Python\Python312\Lib\site-packages\resources/generic/blank\blank.png" shape=none]
+	d85cd28905714744bbaa191d866b945a [label=A height=1.9 image="C:\Users\chris\AppData\Local\Programs\Python\Python312\Lib\site-packages\resources/generic/blank\blank.png" shape=none]
+	"1af045c25b3148b993004293afe34ebd" -> d85cd28905714744bbaa191d866b945a [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+}
