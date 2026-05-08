@@ -83,6 +83,37 @@ SCENARIOS = {
 }
 
 
+def _file_signature(*filepaths: Path) -> tuple[tuple[str, bool, int], ...]:
+    return tuple(
+        (
+            str(filepath),
+            filepath.exists(),
+            filepath.stat().st_mtime_ns if filepath.exists() else -1,
+        )
+        for filepath in filepaths
+    )
+
+
+def _precomputed_file_specs() -> dict[str, tuple[Path, list[str] | None]]:
+    return {
+        "portfolio_study_summary": (PORTFOLIO_STUDY_SUMMARY_FILE, None),
+        "portfolio_construction_summary": (PORTFOLIO_CONSTRUCTION_SUMMARY_FILE, None),
+        "portfolio_rolling_var_es": (PORTFOLIO_ROLLING_VAR_ES_FILE, [DATE_COL]),
+        "portfolio_var_backtest_summary": (PORTFOLIO_VAR_BACKTEST_SUMMARY_FILE, None),
+        "portfolio_var_backtesting_tests": (PORTFOLIO_VAR_BACKTEST_TESTS_FILE, None),
+        "latest_portfolio_var_es": (LATEST_PORTFOLIO_VAR_ES_FILE, [DATE_COL]),
+        "combined_portfolio_var_es": (COMBINED_VOL_MODEL_FILE, [DATE_COL]),
+        "combined_vol_model_summary": (COMBINED_VOL_MODEL_SUMMARY_FILE, None),
+        "vol_model_rankings": (VOL_MODEL_RANKINGS_FILE, None),
+        "stress_test_results": (STRESS_TEST_RESULTS_FILE, None),
+        "stress_test_asset_contributions": (STRESS_TEST_ASSET_CONTRIBUTIONS_FILE, None),
+        "stress_test_summary": (STRESS_TEST_SUMMARY_FILE, None),
+        "risk_driver_summary": (RISK_DRIVER_SUMMARY_FILE, None),
+        "portfolio_risk_contributions": (PORTFOLIO_RISK_CONTRIBUTIONS_FILE, None),
+        "drawdown_attribution_summary": (DRAWDOWN_ATTRIBUTION_FILE, ["Peak Date", "Trough Date"]),
+    }
+
+
 def _read_csv(filepath: Path, parse_dates: list[str] | None = None) -> pd.DataFrame:
     dataframe = pd.read_csv(filepath)
     if parse_dates:
@@ -92,8 +123,13 @@ def _read_csv(filepath: Path, parse_dates: list[str] | None = None) -> pd.DataFr
     return dataframe
 
 
-@st.cache_data(show_spinner=False)
 def load_asset_returns() -> pd.DataFrame:
+    signature = _file_signature(ASSET_RETURNS_FILE, HISTORICAL_PRICES_FILE, NEW_DAILY_PRICES_FILE)
+    return _load_asset_returns_cached(signature)
+
+
+@st.cache_data(show_spinner=False)
+def _load_asset_returns_cached(_signature: tuple[tuple[str, bool, int], ...]) -> pd.DataFrame:
     if ASSET_RETURNS_FILE.exists():
         asset_returns = _read_csv(ASSET_RETURNS_FILE, parse_dates=[DATE_COL])
         if DATE_COL not in asset_returns.columns:
@@ -121,8 +157,13 @@ def load_asset_returns() -> pd.DataFrame:
     return asset_returns.reindex(columns=TICKERS).dropna(how="all")
 
 
-@st.cache_data(show_spinner=False)
 def load_risk_free_rate() -> pd.Series | None:
+    signature = _file_signature(RISK_FREE_RATE_FILE)
+    return _load_risk_free_rate_cached(signature)
+
+
+@st.cache_data(show_spinner=False)
+def _load_risk_free_rate_cached(_signature: tuple[tuple[str, bool, int], ...]) -> pd.Series | None:
     if not RISK_FREE_RATE_FILE.exists():
         return None
 
@@ -139,34 +180,27 @@ def load_risk_free_rate() -> pd.Series | None:
     return risk_free_series
 
 
-@st.cache_data(show_spinner=False)
 def load_frozen_weights_wide() -> pd.DataFrame:
+    signature = _file_signature(FROZEN_WEIGHTS_FILE)
+    return _load_frozen_weights_wide_cached(signature)
+
+
+@st.cache_data(show_spinner=False)
+def _load_frozen_weights_wide_cached(_signature: tuple[tuple[str, bool, int], ...]) -> pd.DataFrame:
     return load_frozen_weights(str(FROZEN_WEIGHTS_FILE), tickers=TICKERS)
 
 
-@st.cache_data(show_spinner=False)
 def load_precomputed_outputs() -> dict[str, pd.DataFrame]:
+    file_specs = _precomputed_file_specs()
+    signature = _file_signature(*(filepath for filepath, _ in file_specs.values()))
+    return _load_precomputed_outputs_cached(signature)
+
+
+@st.cache_data(show_spinner=False)
+def _load_precomputed_outputs_cached(_signature: tuple[tuple[str, bool, int], ...]) -> dict[str, pd.DataFrame]:
     outputs: dict[str, pd.DataFrame] = {}
 
-    file_specs = {
-        "portfolio_study_summary": (PORTFOLIO_STUDY_SUMMARY_FILE, None),
-        "portfolio_construction_summary": (PORTFOLIO_CONSTRUCTION_SUMMARY_FILE, None),
-        "portfolio_rolling_var_es": (PORTFOLIO_ROLLING_VAR_ES_FILE, [DATE_COL]),
-        "portfolio_var_backtest_summary": (PORTFOLIO_VAR_BACKTEST_SUMMARY_FILE, None),
-        "portfolio_var_backtesting_tests": (PORTFOLIO_VAR_BACKTEST_TESTS_FILE, None),
-        "latest_portfolio_var_es": (LATEST_PORTFOLIO_VAR_ES_FILE, [DATE_COL]),
-        "combined_portfolio_var_es": (COMBINED_VOL_MODEL_FILE, [DATE_COL]),
-        "combined_vol_model_summary": (COMBINED_VOL_MODEL_SUMMARY_FILE, None),
-        "vol_model_rankings": (VOL_MODEL_RANKINGS_FILE, None),
-        "stress_test_results": (STRESS_TEST_RESULTS_FILE, None),
-        "stress_test_asset_contributions": (STRESS_TEST_ASSET_CONTRIBUTIONS_FILE, None),
-        "stress_test_summary": (STRESS_TEST_SUMMARY_FILE, None),
-        "risk_driver_summary": (RISK_DRIVER_SUMMARY_FILE, None),
-        "portfolio_risk_contributions": (PORTFOLIO_RISK_CONTRIBUTIONS_FILE, None),
-        "drawdown_attribution_summary": (DRAWDOWN_ATTRIBUTION_FILE, [ "Peak Date", "Trough Date"]),
-    }
-
-    for key, (filepath, parse_dates) in file_specs.items():
+    for key, (filepath, parse_dates) in _precomputed_file_specs().items():
         if filepath.exists():
             outputs[key] = _read_csv(filepath, parse_dates=parse_dates)
         else:

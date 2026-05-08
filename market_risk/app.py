@@ -122,7 +122,7 @@ PRESET_META = {
     },
 }
 
-REPO_URL = "https://github.com/Monoji77/personal_projects/tree/project1/market-risk-engine"
+REPO_URL = "https://github.com/Monoji77/personal_projects/tree/main/market_risk"
 ACTIVE_PAGE_KEY = "active_page_key"
 LAST_RENDERED_PAGE_KEY = "last_rendered_page_key"
 PAGE_QUERY_PARAM_KEY = "page"
