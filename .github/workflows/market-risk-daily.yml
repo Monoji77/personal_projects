@@ -1,0 +1,63 @@
+name: Market Risk Daily Refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * *"
+      timezone: "Asia/Singapore"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: market-risk-daily
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: market_risk
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: market_risk/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pipeline
+        run: |
+          python scripts/01_get_historical_data.py
+          python scripts/02_historical_study.py
+          python scripts/03_portfolio_study.py
+          python scripts/04A_portfolio_construction.py
+          python scripts/04B_market_risk_engine.py
+          python scripts/04C_risk_engine_visualizations.py
+          python scripts/04D_var_backtesting_tests.py
+          python scripts/05A_ewma_t_var_es.py
+          python scripts/05B_garch_t_var_es.py
+          python scripts/05C_volatility_model_comparison.py
+          python scripts/06_stress_testing.py
+          python scripts/07_risk_attribution.py
+
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-risk-daily-output
+          path: |
+            market_risk/data
+            market_risk/figure
+          retention-days: 14
