@@ -75,5 +75,7 @@ The tree below is intentionally concise and excludes anything ignored by `.gitig
 ```
 
 ## Notes
+
+- `market_risk/additional_materials/` is intentionally omitted above because it is ignored by `.gitignore`.
 - Generated figures and CSV outputs are organized under `market_risk/figure/`.
 - The main dashboard entrypoint is `market_risk/app.py`.

@@ -1,5 +1,4 @@
 name: Market Risk Daily Refresh
-
 on:
   push:
     branches:
@@ -64,8 +63,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git pull
-          
           git add data figure
           if git diff --cached --quiet; then
             echo "No changes to commit"

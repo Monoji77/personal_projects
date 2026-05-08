@@ -51,13 +51,6 @@ The app combines precomputed research outputs with a live custom-portfolio lab. 
 - EWMA-t uses exponentially weighted volatility with Student-t tails.
 - GARCH-t is refit live for the custom portfolio inside the dashboard and is also available in the fixed-portfolio comparison outputs.
 
-## Refresh cadence
-
-- A GitHub Actions workflow on `main` is configured to run the full refresh pipeline once per day at `07:23PM` `Asia/Singapore` time.
-- The scheduled run refreshes the stored datasets under `data/` and the precomputed outputs under `figure/`.
-- The Streamlit app reads those generated files directly. When the underlying files change in the local working tree, the cached data loaders invalidate automatically and the app uses the refreshed data.
-- If you are running the app from a local clone, the daily GitHub Actions refresh only appears in your local Streamlit session after your local `main` branch has the updated files.
-
 ## Repository layout
 
 ```text
@@ -140,4 +133,4 @@ Main packages used by the project:
 
 - `style.css` is required for the hover-tab sidebar behavior.
 - The dashboard mixes precomputed outputs for fixed portfolios with live calculations for the custom portfolio.
-- The repository link surfaced inside the app points to the `market_risk` folder on the `main` branch of the parent GitHub repository.
+- The repository link surfaced inside the app points to the broader market-risk-engine project folder in the parent GitHub repository.
