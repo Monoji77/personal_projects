@@ -1,4 +1,4 @@
 Portfolio,Worst Scenario,Worst Stress Loss,Worst Stress Return,Worst Contributing Asset,Average Stress Loss,Median Stress Loss,Number of Scenarios,Number of Scenarios Exceeding Latest VaR,Number of Scenarios Exceeding Latest ES,Main Risk Comment
 Equal Weighted Portfolio,Extreme single-day tech crash,0.11000000000000001,-0.11000000000000001,NVDA,0.07133333333333335,0.05399999999999999,3,3,3,Highest stress sensitivity due to concentrated exposure.
-Long-only Global Minimum Variance Portfolio,Extreme single-day tech crash,0.09999999999999998,-0.09999999999999998,MSFT,0.05999999999999999,0.04999999999999999,3,3,3,Most defensive portfolio under the selected stress scenarios.
-Long-only Tangency Portfolio,Extreme single-day tech crash,0.12876323553399616,-0.12876323553399616,NVDA,0.09259833360519563,0.09903176528159074,3,3,3,Stress losses are mainly driven by NVDA exposure.
+Long-only Global Minimum Variance Portfolio,Extreme single-day tech crash,0.09999999999999999,-0.09999999999999999,MSFT,0.06,0.049999999999999996,3,3,3,Most defensive portfolio under the selected stress scenarios.
+Long-only Tangency Portfolio,Extreme single-day tech crash,0.12876323878400772,-0.12876323878400772,NVDA,0.0925983372885421,0.09903177308161851,3,3,3,Stress losses are mainly driven by NVDA exposure.
