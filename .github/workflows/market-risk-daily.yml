@@ -3,7 +3,7 @@ name: Market Risk Daily Refresh
 on:
   workflow_dispatch:
   schedule:
-    - cron: "55 18 * * *" # Every day at 10:40 AM SGT
+    - cron: "05 19 * * *" # Every day at 10:40 AM SGT
       timezone: "Asia/Singapore"
 
 permissions:
