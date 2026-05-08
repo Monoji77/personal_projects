@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *" # Once every 5 min
-      timezone: "Asia/Singapore"
+      # timezone: "Asia/Singapore"
 
 permissions:
   contents: write
