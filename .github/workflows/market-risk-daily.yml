@@ -1,10 +1,10 @@
 name: Market Risk Daily Refresh
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *" # Once every 5 min
-      # timezone: "Asia/Singapore"
+  workflow_dispatch:
+
 
 permissions:
   contents: write
@@ -78,4 +78,13 @@ jobs:
             market_risk/data
             market_risk/figure
           retention-days: 14
+
+      - name: Ping CronSignal
+        if: always()
+        uses: CronSignal/ping-action@v1
+        env:
+          JOB_STATUS: ${{ job.status }}
+        with:
+          check-id: ${{ secrets.CRONSIGNAL_CHECK_ID }}
+          ping-on-failure: fail
       
